@@ -1,4 +1,4 @@
-import { MoreHorizontal, Mic, Smile, Paperclip, SendHorizontal } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import {
@@ -113,8 +113,8 @@ const ChatWindow = ({ chat }: ChatWindowProps) => {
                     <button className="w-8 h-8 flex justify-center items-center rounded-[8px] border border-[#E8E5DF]">
                         <VideoIcon />
                     </button>
-                    <button className="p-2.5 text-[#6B7280] hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-[#F1F3F2]">
-                        <MoreHorizontal className="w-5 h-5" />
+                    <button className="w-8 h-8 flex justify-center items-center rounded-[8px] border border-[#E8E5DF]">
+                        <MoreHorizontal className="w-4 h-4 text-[#262626]" />
                     </button>
                 </div>
             </div>
@@ -123,32 +123,32 @@ const ChatWindow = ({ chat }: ChatWindowProps) => {
             <div className="flex-1 rounded-[16px] bg-[#F3F3EE] overflow-y-auto p-3">
                 <div className="min-h-full flex flex-col justify-end">
                     <div className="flex justify-center mb-8">
-                        <div className="bg-white px-4 py-1.5 rounded-full border border-[#F1F3F2]">
-                            <span className="text-[12px] font-semibold text-[#6B7280]">Today</span>
+                        <div className="bg-white px-3 py-1 rounded-full">
+                            <span className="text-[14px] font-medium text-[#596881]">Today</span>
                         </div>
                     </div>
 
                     {messages.map((msg, index) => {
                         const isSameTime = index > 0 && messages[index - 1].time === msg.time;
-                        
+
                         return (
                             <div
                                 key={msg.id}
                                 className={cn(
                                     'flex flex-col space-y-1',
                                     msg.sender === 'self' ? 'items-end' : 'items-start',
-                                    index === 0 ? '' : (isSameTime ? 'mt-1' : 'mt-3')
+                                    index === 0 ? '' : isSameTime ? 'mt-1' : 'mt-3'
                                 )}
                             >
                                 <div
                                     className={cn(
                                         'max-w-[480px] p-3 rounded-xl relative',
                                         msg.sender === 'self'
-                                            ? 'bg-[#F0FDF4] text-[#1A1C1E] '
-                                            : 'bg-white text-[#1A1C1E]'
+                                            ? 'bg-[#F0FDF4] text-[#111625] '
+                                            : 'bg-white text-[#1C1C1C]'
                                     )}
                                 >
-                                    <p className="text-[14px] leading-relaxed">{msg.text}</p>
+                                    <p className="text-xs leading-4 font-normal">{msg.text}</p>
                                 </div>
                                 {msg.showTime && (
                                     <div className="flex items-center gap-1.5 py-1">
@@ -165,7 +165,6 @@ const ChatWindow = ({ chat }: ChatWindowProps) => {
                     })}
                 </div>
             </div>
-
 
             {/* Message Input */}
             <div className="mt-3 bg-white ">
@@ -185,7 +184,7 @@ const ChatWindow = ({ chat }: ChatWindowProps) => {
                             <AttachementIcon />
                         </button>
                         <button className="p-[5px] h-8 w-8 bg-[#04A77D] text-white rounded-xl hover:bg-[#038E6A] transition-all flex items-center justify-center ml-1 cursor-pointer">
-                            <SendIcon  />
+                            <SendIcon />
                         </button>
                     </div>
                 </InputGroup>

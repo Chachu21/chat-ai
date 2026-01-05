@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Archive, Folder, MessageSquare } from 'lucide-react';
+import { Archive, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import SearchIcon from './icons/SearchIcon';
@@ -8,6 +8,7 @@ import NewMessagePopup from './NewMessagePopup';
 import DoubleCheckIcon from './icons/DoubleCheckIcon';
 import ChatContextMenu from './ChatContextMenu';
 import { Chat } from '@/types/chat';
+import { Input } from './ui/input';
 
 interface MessageSidebarProps {
     chats: Chat[];
@@ -16,7 +17,12 @@ interface MessageSidebarProps {
 }
 
 const MessageSidebar = ({ chats, onSelectChat, onUpdateChat }: MessageSidebarProps) => {
-    const [contextMenu, setContextMenu] = useState<{ x: number; y: number; visible: boolean; chatId: number | null }>({
+    const [contextMenu, setContextMenu] = useState<{
+        x: number;
+        y: number;
+        visible: boolean;
+        chatId: number | null;
+    }>({
         x: 0,
         y: 0,
         visible: false,
@@ -35,24 +41,24 @@ const MessageSidebar = ({ chats, onSelectChat, onUpdateChat }: MessageSidebarPro
 
     const handleMenuAction = (action: string) => {
         if (!contextMenu.chatId) return;
-        
+
         const updates: Partial<Chat> = {};
         if (action === 'archive') {
-            const chat = chats.find(c => c.id === contextMenu.chatId);
+            const chat = chats.find((c) => c.id === contextMenu.chatId);
             updates.isArchived = !chat?.isArchived;
             updates.unread = false; // reset unread if archiving
         } else if (action === 'unread') {
-             const chat = chats.find(c => c.id === contextMenu.chatId);
-             updates.unread = !chat?.unread;
-             updates.isArchived = false; // reset archive if marking unread
+            const chat = chats.find((c) => c.id === contextMenu.chatId);
+            updates.unread = !chat?.unread;
+            updates.isArchived = false; // reset archive if marking unread
         } else if (action === 'delete') {
             // In a real app we'd delete, for now just hide or clear visual state
             updates.isArchived = false;
-            updates.unread = false; 
+            updates.unread = false;
         }
 
         onUpdateChat(contextMenu.chatId, updates);
-        setContextMenu(prev => ({ ...prev, visible: false }));
+        setContextMenu((prev) => ({ ...prev, visible: false }));
     };
 
     return (
@@ -68,10 +74,7 @@ const MessageSidebar = ({ chats, onSelectChat, onUpdateChat }: MessageSidebarPro
             <div className="flex items-center justify-between">
                 <h1 className="text-xl leading-7.5 font-semibold text-[#111625]">All Message</h1>
                 <div>
-                     <NewMessagePopup 
-                        onSelectChat={onSelectChat}
-                        chats={chats}
-                     >
+                    <NewMessagePopup onSelectChat={onSelectChat} chats={chats}>
                         <button className="bg-[#1E9A80] hover:bg-[#038E6A] text-white h-8  px-2 py-[6px] rounded-[8px] flex items-center gap-[6px] cursor-pointer">
                             <svg
                                 width="14"
@@ -99,7 +102,7 @@ const MessageSidebar = ({ chats, onSelectChat, onUpdateChat }: MessageSidebarPro
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 items-center">
                         <SearchIcon color="#262626" width={16} height={16} />
                     </div>
-                    <input
+                    <Input
                         type="text"
                         placeholder="Search in message"
                         className="w-full bg-transparent placeholder:text-[#404040] placeholder:text-sm placeholder:leading-5 h-10 border border-[#E8E5DF] rounded-[10px] py-2.5 pl-10 pr-4 text-sm"
@@ -116,19 +119,21 @@ const MessageSidebar = ({ chats, onSelectChat, onUpdateChat }: MessageSidebarPro
                         key={chat.id}
                         onContextMenu={(e) => handleContextMenu(e, chat.id)}
                         onClick={(e) => {
-                             // Always select the chat on left click
-                             onSelectChat(chat.id);
+                            // Always select the chat on left click
+                            onSelectChat(chat.id);
                         }}
-                        className="relative overflow-hidden rounded-[12px] transition-all cursor-pointer group"
+                        className="relative overflow-hidden rounded-[12px] space-x-2 transition-all cursor-pointer group"
                     >
                         {/* Base Chat Item */}
-                        <div className={cn(
-                            'p-3 flex items-start gap-3 w-full h-full relative z-10 transition-transform duration-300',
-                             chat.active ? 'bg-[#F8FAF9]' : 'bg-white hover:bg-gray-50',
-                             // If archived, slide to show right overlay. If unread, slide to show left overlay.
-                             chat.isArchived ? '-translate-x-[70px]' : '',
-                             chat.unread ? 'translate-x-[70px]' : ''
-                        )}>
+                        <div
+                            className={cn(
+                                'p-3 flex items-start gap-3 w-full h-full relative z-10 transition-transform duration-300',
+                                chat.active ? 'bg-[#F3F3EE]' : 'bg-white hover:bg-gray-50',
+                                // If archived, slide to show right overlay. If unread, slide to show left overlay.
+                                chat.isArchived ? '-translate-x-[70px]' : '',
+                                chat.unread ? 'translate-x-[70px]' : ''
+                            )}
+                        >
                             <div className="">
                                 <Image
                                     src={chat.avatar}
@@ -152,28 +157,32 @@ const MessageSidebar = ({ chats, onSelectChat, onUpdateChat }: MessageSidebarPro
                                     <p className="text-xs leading-4 font-normal text-[#8B8B8B] truncate">
                                         {chat.message}
                                     </p>
-                                    <DoubleCheckIcon  />
+                                    <DoubleCheckIcon />
                                 </div>
                             </div>
                         </div>
 
-                         {/* Archived Visual State (Right Side) */}
-                         <div className={cn(
-                             "absolute inset-y-0 right-0 w-[70px] bg-[#00A77F] flex flex-col items-center justify-center text-white gap-1 z-0 transition-opacity duration-300",
-                             chat.isArchived ? "opacity-100" : "opacity-0"
-                         )}>
-                             <Archive className="w-5 h-5" />
-                             <span className="text-[10px] font-medium">Archive</span>
-                         </div>
+                        {/* Archived Visual State (Right Side) */}
+                        <div
+                            className={cn(
+                                'absolute inset-y-0 right-0 space-y-2 rounded-[12px] w-16 h-16  bg-[#00A77F] flex flex-col items-center justify-center text-white gap-1 z-0 transition-opacity duration-300',
+                                chat.isArchived ? 'opacity-100' : 'opacity-0'
+                            )}
+                        >
+                            <Archive className="w-5 h-5" />
+                            <span className="text-xs leading-4 font-medium">Archive</span>
+                        </div>
 
-                         {/* Unread Visual State (Left Side) */}
-                         <div className={cn(
-                             "absolute inset-y-0 left-0 w-[70px] bg-[#00A77F] flex flex-col items-center justify-center text-white gap-1 z-0 transition-opacity duration-300",
-                             chat.unread ? "opacity-100" : "opacity-0"
-                         )}>
-                             <MessageSquare className="w-5 h-5" />
-                             <span className="text-[10px] font-medium">Unread</span>
-                         </div>
+                        {/* Unread Visual State (Left Side) */}
+                        <div
+                            className={cn(
+                                'absolute inset-y-0 space-y-2 left-0 w-16 h-16 bg-[#1E9A80] rounded-[12px] flex flex-col items-center justify-center text-white gap-1 z-0 transition-opacity duration-300',
+                                chat.unread ? 'opacity-100' : 'opacity-0'
+                            )}
+                        >
+                            <MessageSquare className="w-5 h-5" />
+                            <span className="text-xs leading-4 font-medium">Unread</span>
+                        </div>
                     </div>
                 ))}
             </div>

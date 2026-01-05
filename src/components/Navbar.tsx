@@ -1,13 +1,12 @@
 'use client';
 
-import { Bell, Settings, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import TaskIcon from './icons/TaskIcon';
 import SearchIcon from './icons/SearchIcon';
 import { InputGroup, InputGroupAddon, InputGroupInput } from './ui/input-group';
 import RingIcon from './icons/RingIcon';
 import SettingIcon from './icons/SettingIcon';
-import ShortCutIcon from './icons/ShortCutIcon';
 import { Separator } from './ui/separator';
 import ContactInfo from './ContactInfo';
 
@@ -32,9 +31,9 @@ const Navbar = () => {
                         />
                         <InputGroupAddon
                             align="inline-end"
-                            className="absolute right-3 py-1 px-[6px] rounded-[6px] bg-[#F3F3EE]"
+                            className="absolute right-3 py-1 px-[6px] rounded-[6px] bg-[#F3F3EE] text-[#404040]"
                         >
-                            <ShortCutIcon />
+                            ⌘+K
                         </InputGroupAddon>
                     </InputGroup>
 

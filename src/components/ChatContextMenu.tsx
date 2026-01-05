@@ -11,6 +11,13 @@ import {
     Trash2,
     ChevronRight,
 } from 'lucide-react';
+import TaskIcon from './icons/TaskIcon';
+import ArchievIcon from './icons/ArchievIcon';
+import MuteIcon from './icons/MuteIcon';
+import ContactIcon from './icons/ContactIcon';
+import ExportIcon from './icons/ExportIcon';
+import CloseIcon from './icons/CloseIcon';
+import DeleteIcon from './icons/DeleteIcon';
 
 interface ChatContextMenuProps {
     x: number;
@@ -44,65 +51,65 @@ const ChatContextMenu = ({ x, y, onClose, onAction }: ChatContextMenuProps) => {
         <div
             ref={menuRef}
             style={{ top: y, left: x }}
-            className="fixed z-50 flex flex-col p-2 bg-white border border-[#E8E5DF] shadow-[0px_0px_24px_rgba(0,0,0,0.06)] rounded-[16px] w-[200px]"
+            className="fixed z-50 flex flex-col p-2 space-y-1 bg-white border border-[#E8E5DF] shadow-[0px_0px_24px_rgba(0,0,0,0.06)] rounded-[16px] w-[200px]"
         >
-            <button 
+            <button
                 onClick={() => handleAction('unread')}
-                className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#F3F4F6] rounded-lg transition-colors text-left group"
+                className="w-full flex items-center gap-2.5 px-2 py-1.5 hover:bg-[#F3F3EE] rounded-[8px] transition-colors text-left group"
             >
-                <MessageSquare className="w-4 h-4 text-[#1A1C1E]" />
-                <span className="text-sm font-medium text-[#1A1C1E]">Mark as unread</span>
+                <TaskIcon />
+                <span className="text-sm font-medium text-[#111625] leading-5">Mark as unread</span>
             </button>
 
-            <button 
+            <button
                 onClick={() => handleAction('archive')}
-                className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#F3F4F6] rounded-lg transition-colors text-left group"
+                className="w-full flex items-center gap-2.5 px-2 py-1.5 hover:bg-[#F3F3EE] rounded-lg transition-colors text-left group"
             >
-                <Archive className="w-4 h-4 text-[#1A1C1E]" />
-                <span className="text-sm font-medium text-[#1A1C1E]">Archive</span>
+                <ArchievIcon />
+                <span className="text-sm font-medium text-[#111625] leading-5">Archive</span>
             </button>
 
-            <button 
+            <button
                 onClick={() => handleAction('mute')}
-                className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-[#F3F4F6] rounded-lg transition-colors text-left group"
+                className="w-full flex items-center justify-between px-2 py-1.5 hover:bg-[#F3F3EE] rounded-lg transition-colors text-left group"
             >
                 <div className="flex items-center gap-3">
-                    <VolumeX className="w-4 h-4 text-[#1A1C1E]" />
-                    <span className="text-sm font-medium text-[#1A1C1E]">Mute</span>
+                    <MuteIcon />
+                    <span className="text-sm font-medium text-[#111625] leading-5">Mute</span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-[#1A1C1E]" />
             </button>
 
-            <button 
+            <button
                 onClick={() => handleAction('contact-info')}
-                className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#F3F4F6] rounded-lg transition-colors text-left group"
+                className="w-full flex items-center gap-2.5 px-2 py-1.5 hover:bg-[#F3F3EE] rounded-lg transition-colors text-left group"
             >
-                <UserCircle className="w-4 h-4 text-[#1A1C1E]" />
-                <span className="text-sm font-medium text-[#1A1C1E]">Contact info</span>
+                <ContactIcon />
+                <span className="text-sm font-medium text-[#111625] leading-5">Contact info</span>
             </button>
 
-            <button 
+            <button
                 onClick={() => handleAction('export')}
-                className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#F3F4F6] rounded-lg transition-colors text-left group"
+                className="w-full flex items-center gap-2.5 px-2 py-1.5 hover:bg-[#F3F3EE] rounded-lg transition-colors text-left group"
             >
-                <Share className="w-4 h-4 text-[#1A1C1E]" />
-                <span className="text-sm font-medium text-[#1A1C1E]">Export chat</span>
+                <ExportIcon />
+                <span className="text-sm font-medium text-[#111625] leading-5">Export chat</span>
             </button>
 
-            <button 
+            <button
                 onClick={() => handleAction('clear')}
-                className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#F3F4F6] rounded-lg transition-colors text-left group"
+                className="w-full flex items-center gap-2.5 px-2 py-1.5 hover:bg-[#F3F3EE] rounded-lg transition-colors text-left group"
             >
-                <X className="w-4 h-4 text-[#1A1C1E]" />
-                <span className="text-sm font-medium text-[#1A1C1E]">Clear chat</span>
+                <CloseIcon />
+                <span className="text-sm font-medium text-[#111625] leading-5">Clear chat</span>
             </button>
 
-            <button 
+            <button
                 onClick={() => handleAction('delete')}
-                className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#F3F4F6] rounded-lg transition-colors text-left group"
+                className="w-full flex items-center gap-2.5 px-2 py-1.5 hover:bg-[#F3F3EE] rounded-lg transition-colors text-left group"
             >
-                <Trash2 className="w-4 h-4 text-[#FF4766]" />
-                <span className="text-sm font-medium text-[#FF4766]">Delete chat</span>
+                <DeleteIcon />
+                <span className="text-sm leading-5 font-medium text-[#DF1C41]">Delete chat</span>
             </button>
         </div>
     );
