@@ -34,10 +34,10 @@ const ChatContextMenu = ({ x, y, onClose, onAction, containerRef }: ChatContextM
             if (containerRef?.current && containerRef.current.contains(target)) {
                 return;
             }
+            
             onClose();
         };
 
-        // Delay adding the listener to prevent the opening click from immediately closing the menu
         const timeoutId = setTimeout(() => {
             document.addEventListener('mousedown', handleClickOutside);
         }, 0);

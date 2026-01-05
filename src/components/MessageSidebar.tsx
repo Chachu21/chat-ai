@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { Archive } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
@@ -31,6 +31,7 @@ const MessageSidebar = ({ chats, onSelectChat, onUpdateChat }: MessageSidebarPro
     });
 
     const containerRef = useRef<HTMLDivElement>(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const handleContextMenu = (e: React.MouseEvent, chatId: number) => {
         e.preventDefault();
@@ -85,6 +86,18 @@ const MessageSidebar = ({ chats, onSelectChat, onUpdateChat }: MessageSidebarPro
         setContextMenu((prev) => ({ ...prev, visible: false }));
     };
 
+    // Filter chats based on search query
+    const filteredChats = useMemo(() => {
+        if (!searchQuery.trim()) {
+            return chats;
+        }
+        const query = searchQuery.toLowerCase();
+        return chats.filter(chat => 
+            chat.name.toLowerCase().includes(query) || 
+            chat.message.toLowerCase().includes(query)
+        );
+    }, [chats, searchQuery]);
+
     return (
         <div ref={containerRef} className="w-100 h-screen bg-white flex flex-col rounded-[24px] p-6 space-y-6 relative">
             {contextMenu.visible && (
@@ -130,7 +143,9 @@ const MessageSidebar = ({ chats, onSelectChat, onUpdateChat }: MessageSidebarPro
                     <Input
                         type="text"
                         placeholder="Search in message"
-                        className="w-full bg-transparent placeholder:text-[#404040] placeholder:text-sm placeholder:leading-5 h-10 border border-[#E8E5DF] rounded-[10px] py-2.5 pl-10 pr-4 text-sm"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full text-[#404040] bg-transparent placeholder:text-[#404040] placeholder:text-sm placeholder:leading-5 h-10 border border-[#E8E5DF] rounded-[10px] py-2.5 pl-10 pr-4 text-sm"
                     />
                 </div>
                 <button className="p-2.5 rounded-[10px] w-10 h-10 flex justify-center items-center border border-[#E8E5DF] transition-colors">
@@ -139,13 +154,23 @@ const MessageSidebar = ({ chats, onSelectChat, onUpdateChat }: MessageSidebarPro
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-2">
-                {chats.map((chat) => (
+                {filteredChats.map((chat) => (
                         <div
                             key={chat.id}
-                            onClick={(e) => {
-                                // Always select the chat on left click
+                            onClick={() => {
+                                // Single click: close menu if open, then select the chat
+                                if (contextMenu.visible) {
+                                    setContextMenu({ ...contextMenu, visible: false });
+                                }
                                 onSelectChat(chat.id);
-                                // Toggle context menu
+                            }}
+                            onDoubleClick={(e) => {
+                                // Double click: toggle context menu
+                                toggleContextMenu(e, chat.id);
+                            }}
+                            onContextMenu={(e) => {
+                                // Right click: toggle context menu
+                                e.preventDefault();
                                 toggleContextMenu(e, chat.id);
                             }}
                             className="transition-all cursor-pointer group flex items-stretch hover:z-10"
