@@ -1,82 +1,77 @@
-import { Check, CheckCheck, Folder } from 'lucide-react';
+import { useState } from 'react';
+import { Archive, Folder, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import SearchIcon from './icons/SearchIcon';
 import FilterIcon from './icons/FilterIcon';
 import NewMessagePopup from './NewMessagePopup';
 import DoubleCheckIcon from './icons/DoubleCheckIcon';
+import ChatContextMenu from './ChatContextMenu';
+import { Chat } from '@/types/chat';
 
-const messages = [
-    {
-        id: 1,
-        name: 'Adrian Kurt',
-        time: '3 mins ago',
-        message: 'Thanks for the explanation!',
-        avatar: '/images/profile-1.jpg',
-        unread: false,
-        active: true,
-        status: 'sent',
-        hasArchive: true,
-    },
-    {
-        id: 2,
-        name: 'Yomi Immanuel',
-        time: '12 mins ago',
-        message: "Let's do a quick call after lunch, I'll explai...",
-        avatar: '/images/profile-1.jpg',
-        unread: false,
-        active: false,
-        status: 'delivered',
-    },
-    {
-        id: 3,
-        name: 'Bianca Nubia',
-        time: '32 mins ago',
-        message: 'anytime! my pleasure~',
-        avatar: '/images/profile-1.jpg',
-        unread: false,
-        active: false,
-        status: 'read',
-    },
-    {
-        id: 4,
-        name: 'Zender Lowre',
-        time: '1 hour ago',
-        message: 'Okay cool, that make sense 👍',
-        avatar: '/images/profile-1.jpg',
-        unread: false,
-        active: false,
-        status: 'read',
-    },
-    {
-        id: 5,
-        name: 'Palmer Dian',
-        time: '5 hour ago',
-        message: 'Thanks, Jonas! That helps 😁',
-        avatar: '/images/profile-1.jpg',
-        unread: false,
-        active: false,
-        status: 'read',
-    },
-    {
-        id: 6,
-        name: 'Yuki Tanaka',
-        time: '12 hour ago',
-        message: 'Have you watch the new season of Danm...',
-        avatar: '/images/profile-1.jpg',
-        unread: false,
-        active: false,
-        status: 'read',
-    },
-];
+interface MessageSidebarProps {
+    chats: Chat[];
+    onSelectChat: (id: number) => void;
+    onUpdateChat: (id: number, updates: Partial<Chat>) => void;
+}
 
-const MessageSidebar = () => {
+const MessageSidebar = ({ chats, onSelectChat, onUpdateChat }: MessageSidebarProps) => {
+    const [contextMenu, setContextMenu] = useState<{ x: number; y: number; visible: boolean; chatId: number | null }>({
+        x: 0,
+        y: 0,
+        visible: false,
+        chatId: null,
+    });
+
+    const handleContextMenu = (e: React.MouseEvent, chatId: number) => {
+        e.preventDefault();
+        setContextMenu({
+            x: e.clientX,
+            y: e.clientY,
+            visible: true,
+            chatId,
+        });
+    };
+
+    const handleMenuAction = (action: string) => {
+        if (!contextMenu.chatId) return;
+        
+        const updates: Partial<Chat> = {};
+        if (action === 'archive') {
+            const chat = chats.find(c => c.id === contextMenu.chatId);
+            updates.isArchived = !chat?.isArchived;
+            updates.unread = false; // reset unread if archiving
+        } else if (action === 'unread') {
+             const chat = chats.find(c => c.id === contextMenu.chatId);
+             updates.unread = !chat?.unread;
+             updates.isArchived = false; // reset archive if marking unread
+        } else if (action === 'delete') {
+            // In a real app we'd delete, for now just hide or clear visual state
+            updates.isArchived = false;
+            updates.unread = false; 
+        }
+
+        onUpdateChat(contextMenu.chatId, updates);
+        setContextMenu(prev => ({ ...prev, visible: false }));
+    };
+
     return (
-        <div className="w-100 h-screen bg-white flex flex-col rounded-[24px] p-6 space-y-6">
+        <div className="w-100 h-screen bg-white flex flex-col rounded-[24px] p-6 space-y-6 relative">
+            {contextMenu.visible && (
+                <ChatContextMenu
+                    x={contextMenu.x}
+                    y={contextMenu.y}
+                    onClose={() => setContextMenu({ ...contextMenu, visible: false })}
+                    onAction={handleMenuAction}
+                />
+            )}
             <div className="flex items-center justify-between">
                 <h1 className="text-xl leading-7.5 font-semibold text-[#111625]">All Message</h1>
                 <div>
-                    <NewMessagePopup>
+                     <NewMessagePopup 
+                        onSelectChat={onSelectChat}
+                        chats={chats}
+                     >
                         <button className="bg-[#1E9A80] hover:bg-[#038E6A] text-white h-8  px-2 py-[6px] rounded-[8px] flex items-center gap-[6px] cursor-pointer">
                             <svg
                                 width="14"
@@ -116,47 +111,69 @@ const MessageSidebar = () => {
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-2">
-                {messages.map((chat) => (
+                {chats.map((chat) => (
                     <div
                         key={chat.id}
-                        className={cn(
-                            'group rounded-[12px] p-3 flex items-start gap-3 cursor-pointer transition-all relative',
-                            chat.active ? 'bg-[#F8FAF9]' : 'hover:bg-gray-50'
-                        )}
+                        onContextMenu={(e) => handleContextMenu(e, chat.id)}
+                        onClick={(e) => {
+                             // Always select the chat on left click
+                             onSelectChat(chat.id);
+                        }}
+                        className="relative overflow-hidden rounded-[12px] transition-all cursor-pointer group"
                     >
-                        <div className="">
-                            <Image
-                                src={chat.avatar}
-                                alt={chat.name}
-                                width={40}
-                                height={40}
-                                className="w-10 h-10 rounded-full object-cover"
-                            />
+                        {/* Base Chat Item */}
+                        <div className={cn(
+                            'p-3 flex items-start gap-3 w-full h-full relative z-10 transition-transform duration-300',
+                             chat.active ? 'bg-[#F8FAF9]' : 'bg-white hover:bg-gray-50',
+                             // If archived, slide to show right overlay. If unread, slide to show left overlay.
+                             chat.isArchived ? '-translate-x-[70px]' : '',
+                             chat.unread ? 'translate-x-[70px]' : ''
+                        )}>
+                            <div className="">
+                                <Image
+                                    src={chat.avatar}
+                                    alt={chat.name}
+                                    width={40}
+                                    height={40}
+                                    className="w-10 h-10 rounded-full object-cover"
+                                />
+                            </div>
+
+                            <div className="flex-1 min-w-0 pr-2 space-y-1">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-sm font-semibold text-[#1C1C1C] truncate">
+                                        {chat.name}
+                                    </h3>
+                                    <span className="text-xs leading-4 font-normal text-[#596881] whitespace-nowrap">
+                                        {chat.time}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <p className="text-xs leading-4 font-normal text-[#8B8B8B] truncate">
+                                        {chat.message}
+                                    </p>
+                                    <DoubleCheckIcon  />
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="flex-1 min-w-0 pr-2 space-y-1">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-smxx` font-semibold text-[#1C1C1C] truncate">
-                                    {chat.name}
-                                </h3>
-                                <span className="text-xs leading-4 font-normal text-[#596881] whitespace-nowrap">
-                                    {chat.time}
-                                </span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <p className="text-xs leading-4 font-normal text-[#8B8B8B] truncate">
-                                    {chat.message}
-                                </p>
-                                <DoubleCheckIcon />
-                            </div>
-                        </div>
+                         {/* Archived Visual State (Right Side) */}
+                         <div className={cn(
+                             "absolute inset-y-0 right-0 w-[70px] bg-[#00A77F] flex flex-col items-center justify-center text-white gap-1 z-0 transition-opacity duration-300",
+                             chat.isArchived ? "opacity-100" : "opacity-0"
+                         )}>
+                             <Archive className="w-5 h-5" />
+                             <span className="text-[10px] font-medium">Archive</span>
+                         </div>
 
-                        {chat.hasArchive && (
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 bg-[#04A77D] text-white p-2 rounded-lg flex flex-col items-center gap-1 transition-opacity">
-                                <Folder className="w-4 h-4" />
-                                <span className="text-[10px]">Archive</span>
-                            </div>
-                        )}
+                         {/* Unread Visual State (Left Side) */}
+                         <div className={cn(
+                             "absolute inset-y-0 left-0 w-[70px] bg-[#00A77F] flex flex-col items-center justify-center text-white gap-1 z-0 transition-opacity duration-300",
+                             chat.unread ? "opacity-100" : "opacity-0"
+                         )}>
+                             <MessageSquare className="w-5 h-5" />
+                             <span className="text-[10px] font-medium">Unread</span>
+                         </div>
                     </div>
                 ))}
             </div>

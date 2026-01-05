@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Popover,
     PopoverContent,
@@ -6,24 +6,30 @@ import {
 } from "@/components/ui/popover";
 import { Search } from 'lucide-react';
 import Image from 'next/image';
+import { Chat } from '@/types/chat';
 
 interface NewMessagePopupProps {
     children: React.ReactNode;
+    chats: Chat[];
+    onSelectChat: (id: number) => void;
 }
 
-const users = [
-    { name: "Adrian Kurt", avatar: "Adrian" },
-    { name: "Bianca Lofre", avatar: "Bianca" },
-    { name: "Diana Sayu", avatar: "Diana" },
-    { name: "Palmer Dian", avatar: "Palmer" },
-    { name: "Sam Kohler", avatar: "Sam" },
-    { name: "Yuki Tanaka", avatar: "Yuki" },
-    { name: "Zender Lowre", avatar: "Zender" },
-];
+const NewMessagePopup = ({ children, chats, onSelectChat }: NewMessagePopupProps) => {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [open, setOpen] = useState(false);
 
-const NewMessagePopup = ({ children }: NewMessagePopupProps) => {
+    const filteredChats = chats.filter(chat => 
+        chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        chat.message.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const handleSelect = (id: number) => {
+        onSelectChat(id);
+        setOpen(false);
+    };
+
     return (
-        <Popover>
+        <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 {children}
             </PopoverTrigger>
@@ -39,6 +45,8 @@ const NewMessagePopup = ({ children }: NewMessagePopupProps) => {
                         <input
                             type="text"
                             placeholder="Search name or email"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full h-9 bg-white border border-[#E5E7EB] rounded-lg pl-9 pr-3 text-sm placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#1E9A80]"
                         />
                         <Search className="w-4 h-4 text-[#9CA3AF] absolute left-3 top-1/2 -translate-y-1/2" />
@@ -46,24 +54,36 @@ const NewMessagePopup = ({ children }: NewMessagePopupProps) => {
                 </div>
 
                 <div className="flex-1 overflow-y-auto -mx-1 px-1 space-y-1">
-                    {users.map((user) => (
-                        <button
-                            key={user.name}
-                            className="w-full flex items-center gap-3 p-2 hover:bg-[#F3F4F6] rounded-xl transition-colors group text-left"
-                        >
-                            <div className="relative w-8 h-8 shrink-0">
-                                <Image
-                                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatar}`}
-                                    alt={user.name}
-                                    fill
-                                    className="rounded-full object-cover"
-                                />
-                            </div>
-                            <span className="text-sm font-medium text-[#111625] truncate">
-                                {user.name}
-                            </span>
-                        </button>
-                    ))}
+                    {filteredChats.length > 0 ? (
+                        filteredChats.map((chat) => (
+                            <button
+                                key={chat.id}
+                                onClick={() => handleSelect(chat.id)}
+                                className="w-full flex items-center gap-3 p-2 hover:bg-[#F3F4F6] rounded-xl transition-colors group text-left"
+                            >
+                                <div className="relative w-8 h-8 shrink-0">
+                                    <Image
+                                        src={chat.avatar}
+                                        alt={chat.name}
+                                        fill
+                                        className="rounded-full object-cover"
+                                    />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <span className="text-sm font-medium text-[#111625] truncate block">
+                                        {chat.name}
+                                    </span>
+                                    <span className="text-xs text-[#6B7280] truncate block">
+                                        {chat.message}
+                                    </span>
+                                </div>
+                            </button>
+                        ))
+                    ) : (
+                        <div className="flex items-center justify-center p-4">
+                            <span className="text-sm text-[#9CA3AF]">No users found</span>
+                        </div>
+                    )}
                 </div>
             </PopoverContent>
         </Popover>
