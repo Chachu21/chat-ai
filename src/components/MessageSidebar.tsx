@@ -9,6 +9,7 @@ import DoubleCheckIcon from './icons/DoubleCheckIcon';
 import ChatContextMenu from './ChatContextMenu';
 import { Chat } from '@/types/chat';
 import { Input } from './ui/input';
+import TaskIcon from './icons/TaskIcon';
 
 interface MessageSidebarProps {
     chats: Chat[];
@@ -115,75 +116,80 @@ const MessageSidebar = ({ chats, onSelectChat, onUpdateChat }: MessageSidebarPro
 
             <div className="flex-1 overflow-y-auto space-y-2">
                 {chats.map((chat) => (
-                    <div
-                        key={chat.id}
-                        onContextMenu={(e) => handleContextMenu(e, chat.id)}
-                        onClick={(e) => {
-                            // Always select the chat on left click
-                            onSelectChat(chat.id);
-                        }}
-                        className="relative overflow-hidden rounded-[12px] space-x-2 transition-all cursor-pointer group"
-                    >
-                        {/* Base Chat Item */}
                         <div
-                            className={cn(
-                                'p-3 flex items-start gap-3 w-full h-full relative z-10 transition-transform duration-300',
-                                chat.active ? 'bg-[#F3F3EE]' : 'bg-white hover:bg-gray-50',
-                                // If archived, slide to show right overlay. If unread, slide to show left overlay.
-                                chat.isArchived ? '-translate-x-[70px]' : '',
-                                chat.unread ? 'translate-x-[70px]' : ''
-                            )}
+                            key={chat.id}
+                            onContextMenu={(e) => handleContextMenu(e, chat.id)}
+                            onClick={(e) => {
+                                // Always select the chat on left click
+                                onSelectChat(chat.id);
+                            }}
+                            className="transition-all cursor-pointer group flex items-stretch hover:z-10"
                         >
-                            <div className="">
-                                <Image
-                                    src={chat.avatar}
-                                    alt={chat.name}
-                                    width={40}
-                                    height={40}
-                                    className="w-10 h-10 rounded-full object-cover"
-                                />
+                             {/* Unread Visual State (Left Side) */}
+                             <div
+                                className={cn(
+                                    'bg-[#1E9A80] flex flex-col items-center justify-center text-white gap-1 transition-all duration-300 overflow-hidden rounded-[12px]',
+                                )}
+                                style={{
+                                    width: chat.unread ? '60px' : '0px',
+                                    opacity: chat.unread ? 1 : 0,
+                                    marginRight: chat.unread ? '8px' : '0px'
+                                }}
+                            >
+                                <TaskIcon color='#FFFFFF' />
+                                <span className="text-xs leading-4 font-medium whitespace-nowrap">Unread</span>
                             </div>
 
-                            <div className="flex-1 min-w-0 pr-2 space-y-1">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="text-sm font-semibold text-[#1C1C1C] truncate">
-                                        {chat.name}
-                                    </h3>
-                                    <span className="text-xs leading-4 font-normal text-[#596881] whitespace-nowrap">
-                                        {chat.time}
-                                    </span>
+                            {/* Base Chat Item */}
+                            <div
+                                className={cn(
+                                    'p-3 flex items-start gap-3 flex-1 min-w-0 transition-all duration-300 rounded-[12px]',
+                                    chat.active ? 'bg-[#F3F3EE]' : 'bg-white hover:bg-gray-50'
+                                )}
+                            >
+                                <div className="">
+                                    <Image
+                                        src={chat.avatar}
+                                        alt={chat.name}
+                                        width={40}
+                                        height={40}
+                                        className="w-10 h-10 rounded-full object-cover"
+                                    />
                                 </div>
-                                <div className="flex justify-between items-center">
-                                    <p className="text-xs leading-4 font-normal text-[#8B8B8B] truncate">
-                                        {chat.message}
-                                    </p>
-                                    <DoubleCheckIcon />
+
+                                <div className="flex-1 min-w-0 pr-2 space-y-1">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-sm font-semibold text-[#1C1C1C] truncate">
+                                            {chat.name}
+                                        </h3>
+                                        <span className="text-xs leading-4 font-normal text-[#596881] whitespace-nowrap">
+                                            {chat.time}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <p className="text-xs leading-4 font-normal text-[#8B8B8B] truncate">
+                                            {chat.message}
+                                        </p>
+                                        <DoubleCheckIcon />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Archived Visual State (Right Side) */}
-                        <div
-                            className={cn(
-                                'absolute inset-y-0 right-0 space-y-2 rounded-[12px] w-16 h-16  bg-[#00A77F] flex flex-col items-center justify-center text-white gap-1 z-0 transition-opacity duration-300',
-                                chat.isArchived ? 'opacity-100' : 'opacity-0'
-                            )}
-                        >
-                            <Archive className="w-5 h-5" />
-                            <span className="text-xs leading-4 font-medium">Archive</span>
+                            {/* Archived Visual State (Right Side) */}
+                            <div
+                                className={cn(
+                                    'bg-[#00A77F] flex flex-col items-center justify-center text-white gap-1 transition-all duration-300 overflow-hidden rounded-[12px]',
+                                )}
+                                style={{
+                                    width: chat.isArchived ? '60px' : '0px',
+                                    opacity: chat.isArchived ? 1 : 0,
+                                    marginLeft: chat.isArchived ? '8px' : '0px'
+                                }}
+                            >
+                                <Archive className="w-4.5 h-4.5 shrink-0" />
+                                <span className="text-xs leading-4 font-medium whitespace-nowrap">Archive</span>
+                            </div>
                         </div>
-
-                        {/* Unread Visual State (Left Side) */}
-                        <div
-                            className={cn(
-                                'absolute inset-y-0 space-y-2 left-0 w-16 h-16 bg-[#1E9A80] rounded-[12px] flex flex-col items-center justify-center text-white gap-1 z-0 transition-opacity duration-300',
-                                chat.unread ? 'opacity-100' : 'opacity-0'
-                            )}
-                        >
-                            <MessageSquare className="w-5 h-5" />
-                            <span className="text-xs leading-4 font-medium">Unread</span>
-                        </div>
-                    </div>
                 ))}
             </div>
         </div>
