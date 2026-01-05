@@ -1,14 +1,7 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import {
-    MessageSquare,
-    Archive,
-    VolumeX,
-    UserCircle,
-    Share,
-    X,
-    Trash2,
     ChevronRight,
 } from 'lucide-react';
 import TaskIcon from './icons/TaskIcon';
@@ -24,23 +17,36 @@ interface ChatContextMenuProps {
     y: number;
     onClose: () => void;
     onAction: (action: string) => void;
+    containerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-const ChatContextMenu = ({ x, y, onClose, onAction }: ChatContextMenuProps) => {
+const ChatContextMenu = ({ x, y, onClose, onAction, containerRef }: ChatContextMenuProps) => {
     const menuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-                onClose();
+            const target = event.target as Node;
+            
+            if (menuRef.current && menuRef.current.contains(target)) {
+                return;
             }
+            
+            if (containerRef?.current && containerRef.current.contains(target)) {
+                return;
+            }
+            onClose();
         };
 
-        document.addEventListener('mousedown', handleClickOutside);
+        // Delay adding the listener to prevent the opening click from immediately closing the menu
+        const timeoutId = setTimeout(() => {
+            document.addEventListener('mousedown', handleClickOutside);
+        }, 0);
+        
         return () => {
+            clearTimeout(timeoutId);
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [onClose]);
+    }, [onClose, containerRef]);
 
     const handleAction = (action: string) => {
         onAction(action);

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Archive, MessageSquare } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Archive } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import SearchIcon from './icons/SearchIcon';
@@ -30,14 +30,37 @@ const MessageSidebar = ({ chats, onSelectChat, onUpdateChat }: MessageSidebarPro
         chatId: null,
     });
 
+    const containerRef = useRef<HTMLDivElement>(null);
+
     const handleContextMenu = (e: React.MouseEvent, chatId: number) => {
         e.preventDefault();
+        e.stopPropagation();
         setContextMenu({
             x: e.clientX,
             y: e.clientY,
             visible: true,
             chatId,
         });
+    };
+
+    const toggleContextMenu = (e: React.MouseEvent, chatId: number) => {
+        // If menu is already open for this chat, close it
+        if (contextMenu.visible && contextMenu.chatId === chatId) {
+            setContextMenu({ ...contextMenu, visible: false });
+        } else {
+            // Get the chat card's position
+            const target = e.currentTarget as HTMLElement;
+            const rect = target.getBoundingClientRect();
+            
+            // Position menu to the left of the chat card, accounting for menu width (200px)
+            const menuWidth = 200;
+            setContextMenu({
+                x: rect.right - menuWidth + 70, // Position menu inside the sidebar, 10px from right edge
+                y: rect.top + rect.height / 2, // Centered vertically
+                visible: true,
+                chatId,
+            });
+        }
     };
 
     const handleMenuAction = (action: string) => {
@@ -63,13 +86,14 @@ const MessageSidebar = ({ chats, onSelectChat, onUpdateChat }: MessageSidebarPro
     };
 
     return (
-        <div className="w-100 h-screen bg-white flex flex-col rounded-[24px] p-6 space-y-6 relative">
+        <div ref={containerRef} className="w-100 h-screen bg-white flex flex-col rounded-[24px] p-6 space-y-6 relative">
             {contextMenu.visible && (
                 <ChatContextMenu
                     x={contextMenu.x}
                     y={contextMenu.y}
                     onClose={() => setContextMenu({ ...contextMenu, visible: false })}
                     onAction={handleMenuAction}
+                    containerRef={containerRef}
                 />
             )}
             <div className="flex items-center justify-between">
@@ -118,10 +142,11 @@ const MessageSidebar = ({ chats, onSelectChat, onUpdateChat }: MessageSidebarPro
                 {chats.map((chat) => (
                         <div
                             key={chat.id}
-                            onContextMenu={(e) => handleContextMenu(e, chat.id)}
                             onClick={(e) => {
                                 // Always select the chat on left click
                                 onSelectChat(chat.id);
+                                // Toggle context menu
+                                toggleContextMenu(e, chat.id);
                             }}
                             className="transition-all cursor-pointer group flex items-stretch hover:z-10"
                         >
