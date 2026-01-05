@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
@@ -6,57 +7,6 @@ import {
     InputGroupInput,
   } from "@/components/ui/input-group"
   
-
-const messages = [
-    {
-        id: 1,
-        text: 'Hey, Dan',
-        time: '10:17 AM',
-        sender: 'other',
-    },
-    {
-        id: 2,
-        text: 'Can you help with with the last task on basecamp, please?',
-        time: '10:17 AM',
-        sender: 'other',
-    },
-    {
-        id: 3,
-        text: "I'm little bit confused with the task.. 😬",
-        time: '10:17 AM',
-        sender: 'other',
-        showTime: true,
-    },
-    {
-        id: 4,
-        text: "it's done already, no worries!",
-        time: '10:22 AM',
-        sender: 'self',
-        status: 'read',
-        showTime: true,
-    },
-    {
-        id: 5,
-        text: 'what...',
-        time: '10:32 AM',
-        sender: 'other',
-    },
-    {
-        id: 6,
-        text: 'Really?! Thank you so much! 🤩',
-        time: '10:32 AM',
-        sender: 'other',
-        showTime: true,
-    },
-    {
-        id: 7,
-        text: 'anytime! my pleasure~',
-        time: '11:01 AM',
-        sender: 'self',
-        status: 'read',
-        showTime: true,
-    },
-];
 
 import { Chat } from '@/types/chat';
 import DoubleCheckIcon from './icons/DoubleCheckIcon';
@@ -70,9 +20,11 @@ import SendIcon from './icons/SendIcon';
 
 interface ChatWindowProps {
     chat?: Chat;
+    onSendMessage?: (chatId: number, text: string) => void;
 }
 
-const ChatWindow = ({ chat }: ChatWindowProps) => {
+const ChatWindow = ({ chat, onSendMessage }: ChatWindowProps) => {
+    const [messageInput, setMessageInput] = useState('');
     if (!chat) {
         return (
             <div className="flex-1 h-[calc(100vh-84px)] bg-[#F8FAF9] flex items-center justify-center rounded-3xl border border-[#F1F3F2]">
@@ -80,6 +32,20 @@ const ChatWindow = ({ chat }: ChatWindowProps) => {
             </div>
         );
     }
+
+    const handleSend = () => {
+        if (messageInput.trim() && onSendMessage) {
+            onSendMessage(chat.id, messageInput.trim());
+            setMessageInput('');
+        }
+    };
+
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+        }
+    };
 
     return (
         <div className="flex-1 h-[calc(100vh-84px)] bg-white flex flex-col rounded-[24px] p-3 overflow-hidden border border-[#F1F3F2]">
@@ -128,8 +94,8 @@ const ChatWindow = ({ chat }: ChatWindowProps) => {
                         </div>
                     </div>
 
-                    {messages.map((msg, index) => {
-                        const isSameTime = index > 0 && messages[index - 1].time === msg.time;
+                    {chat.messages.map((msg, index) => {
+                        const isSameTime = index > 0 && chat.messages[index - 1].time === msg.time;
 
                         return (
                             <div
@@ -171,6 +137,9 @@ const ChatWindow = ({ chat }: ChatWindowProps) => {
                 <InputGroup className="bg-[#F8FAF9] rounded-2xl p-2 flex items-center gap-2 border border-[#E8E5DF] focus-within:border-[#1E9A80]/20 focus-within:bg-white transition-all h-10 shadow-none">
                     <InputGroupInput
                         placeholder="Type any message..."
+                        value={messageInput}
+                        onChange={(e) => setMessageInput(e.target.value)}
+                        onKeyPress={handleKeyPress}
                         className="flex-1 bg-transparent border-none py-2 text-sm focus:ring-0 placeholder:text-[#8796AF] h-auto focus-visible:ring-0 shadow-none text-[#1A1C1E]"
                     />
                     <div className="flex items-center gap-1 py-1">
@@ -183,7 +152,10 @@ const ChatWindow = ({ chat }: ChatWindowProps) => {
                         <button className="p-[5px] text-[#6B7280] hover:bg-gray-100 rounded-xl transition-colors cursor-pointer">
                             <AttachementIcon />
                         </button>
-                        <button className="p-[5px] h-8 w-8 bg-[#04A77D] text-white rounded-xl hover:bg-[#038E6A] transition-all flex items-center justify-center ml-1 cursor-pointer">
+                        <button 
+                            onClick={handleSend}
+                            className="p-[5px] h-8 w-8 bg-[#04A77D] text-white rounded-xl hover:bg-[#038E6A] transition-all flex items-center justify-center ml-1 cursor-pointer"
+                        >
                             <SendIcon />
                         </button>
                     </div>

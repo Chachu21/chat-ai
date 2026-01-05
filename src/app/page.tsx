@@ -18,6 +18,15 @@ const initialChats: Chat[] = [
         active: true,
         status: 'sent',
         hasArchive: true,
+        messages: [
+            { id: 1, text: 'Hey, Dan', time: '10:17 AM', sender: 'other' },
+            { id: 2, text: 'Can you help with the last task on basecamp, please?', time: '10:17 AM', sender: 'other' },
+            { id: 3, text: "I'm little bit confused with the task.. 😬", time: '10:17 AM', sender: 'other', showTime: true },
+            { id: 4, text: "it's done already, no worries!", time: '10:22 AM', sender: 'self', status: 'read', showTime: true },
+            { id: 5, text: 'what...', time: '10:32 AM', sender: 'other' },
+            { id: 6, text: 'Really?! Thank you so much! 🤩', time: '10:32 AM', sender: 'other', showTime: true },
+            { id: 7, text: 'Thanks for the explanation!', time: '11:01 AM', sender: 'self', status: 'read', showTime: true },
+        ],
     },
     {
         id: 2,
@@ -28,6 +37,10 @@ const initialChats: Chat[] = [
         unread: false,
         active: false,
         status: 'delivered',
+        messages: [
+            { id: 1, text: 'Hey Yomi!', time: '9:00 AM', sender: 'self', status: 'read', showTime: true },
+            { id: 2, text: "Let's do a quick call after lunch, I'll explain everything.", time: '9:15 AM', sender: 'other', showTime: true },
+        ],
     },
     {
         id: 3,
@@ -38,6 +51,10 @@ const initialChats: Chat[] = [
         unread: false,
         active: false,
         status: 'read',
+        messages: [
+            { id: 1, text: 'Thanks for your help!', time: '8:30 AM', sender: 'other', showTime: true },
+            { id: 2, text: 'anytime! my pleasure~', time: '8:45 AM', sender: 'self', status: 'read', showTime: true },
+        ],
     },
     {
         id: 4,
@@ -48,6 +65,9 @@ const initialChats: Chat[] = [
         unread: false,
         active: false,
         status: 'read',
+        messages: [
+            { id: 1, text: 'Okay cool, that make sense 👍', time: '7:00 AM', sender: 'other', showTime: true },
+        ],
     },
     {
         id: 5,
@@ -58,6 +78,9 @@ const initialChats: Chat[] = [
         unread: false,
         active: false,
         status: 'read',
+        messages: [
+            { id: 1, text: 'Thanks, Jonas! That helps 😁', time: 'Yesterday', sender: 'other', showTime: true },
+        ],
     },
     {
         id: 6,
@@ -68,6 +91,9 @@ const initialChats: Chat[] = [
         unread: false,
         active: false,
         status: 'read',
+        messages: [
+            { id: 1, text: 'Have you watched the new season of Demon Slayer?', time: 'Yesterday', sender: 'other', showTime: true },
+        ],
     },
 ];
 
@@ -89,6 +115,28 @@ export default function Home() {
         ));
     };
 
+    const handleSendMessage = (chatId: number, text: string) => {
+        setChats(prev => prev.map(chat => {
+            if (chat.id === chatId) {
+                const newMessage = {
+                    id: chat.messages.length + 1,
+                    text,
+                    time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+                    sender: 'self' as const,
+                    status: 'sent' as const,
+                    showTime: true,
+                };
+                return {
+                    ...chat,
+                    messages: [...chat.messages, newMessage],
+                    message: text,
+                    time: 'Just now',
+                };
+            }
+            return chat;
+        }));
+    };
+
     const selectedChat = chats.find(c => c.id === selectedChatId);
 
     return (
@@ -102,7 +150,7 @@ export default function Home() {
                         onSelectChat={handleSelectChat}
                         onUpdateChat={handleUpdateChat}
                     />
-                    <ChatWindow chat={selectedChat} />
+                    <ChatWindow chat={selectedChat} onSendMessage={handleSendMessage} />
                 </div>
             </div>
         </main>
